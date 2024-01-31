@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# This is a bash script that shows listening sockets,
+# also shows the PID and name of the progarm
+
+netstat -lp
