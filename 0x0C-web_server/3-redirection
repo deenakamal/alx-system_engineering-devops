@@ -1,47 +1,25 @@
 #!/usr/bin/env bash
-# Configure your Nginx server so that /redirect_me is redirecting to another page.
+#Configure your Nginx server
+apt-get update
+apt-get -y install nginx
+ufw allow 'Nginx HTTP'
+mkdir -p /var/www/html/
+chmod -R 755 /var/www
+echo 'Hello World!' > /var/www/html/index.html
 
-# Update package lists and install nginx
-sudo apt-get -y update
-sudo apt-get -y install nginx
-
-# Allow Nginx HTTP traffic
-sudo ufw allow 'Nginx HTTP'
-
-# Create a basic HTML file
-echo 'Hello World!' > /var/www/html/index.nginx-debian.html
-
-# Start Nginx service
-sudo service nginx start
-
-# Define Nginx server configuration
-new_config=$(cat <<EOF
+cat <<EOF > /etc/nginx/sites-enabled/default
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-
     root /var/www/html;
     index index.html index.htm index.nginx-debian.html;
-
     server_name _;
-
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-    }
-
     location / {
         try_files \$uri \$uri/ =404;
     }
+    if (\$request_filename ~ redirect_me){
+        rewrite ^ https://sketchfab.com/bluepeno/models permanent;
+    }
 }
 EOF
-)
-
-# Write Nginx configuration to default site configuration file
-echo "$new_config" | sudo tee /etc/nginx/sites-available/default >/dev/null
-
-# Restart Nginx service if it's already running, otherwise start it
-if pgrep nginx >/dev/null; then
-    sudo service nginx restart
-else
-    sudo service nginx start
-fi
+service nginx restart
